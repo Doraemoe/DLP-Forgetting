@@ -25,7 +25,32 @@ public class Read {
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = br.readLine()) != null) {
+			line = line.trim();
+			if(line.equals("")) {
+				continue;
+			}
 			rule = new Rule();
+			
+			if(line.startsWith(":-")) {
+				line = line.substring(2, line.length() - 1).trim();
+				//System.out.println(line);
+				String[] body = line.split(",");
+				for(String b : body) {
+					b = b.trim();
+					if(b.contains("not")) {
+						//System.out.println("not atom is: " + b);
+						String[] naf = b.split(" ");
+						lit = new Literal(true, naf[1]);
+						rule.addToBody(lit);
+					}
+					else {
+						lit = new Literal(false, b);
+						rule.addToBody(lit);
+					}
+				}
+				continue;
+			}
+			
 			String[] sig = line.substring(0, line.length() - 1).split(":-");
 			//System.out.println("head: " + sig[0]);
 			String[] head = sig[0].split(";");

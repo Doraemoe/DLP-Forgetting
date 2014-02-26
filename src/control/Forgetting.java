@@ -120,7 +120,7 @@ public class Forgetting {
 	public void exportToFile(String location) throws IOException {
 		FileWriter fw = new FileWriter(location);
 		for(Rule r : ind) {
-			System.out.println(r);
+			//System.out.println(r);
 			fw.write(r.toString());
 			fw.write("\r\n");
 		}
