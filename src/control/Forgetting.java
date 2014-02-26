@@ -49,6 +49,8 @@ public class Forgetting {
 				rel.add(rule);
 			}
 		}
+		System.out.println(ind);
+		System.out.println(rel);
 	}
 	
 	public void findPairWGPPE(String atom) {
@@ -65,6 +67,8 @@ public class Forgetting {
 	}
 	
 	public void addNewRuleWGPPE(String atom) {
+		System.out.println(WGPPEBody);
+		System.out.println(WGPPEHead);
 		Literal lit = new Literal(false, atom);
 		for(Rule r1 : WGPPEBody) {
 			for(Rule r2 : WGPPEHead) {
@@ -98,6 +102,10 @@ public class Forgetting {
 	}
 
 	public void addNewRuleSHYP(String atom) {
+		
+		System.out.println(SHYPPBody);
+		System.out.println(SHYPNBody);
+		
 		Literal pLit = new Literal(false, atom);
 		Literal nLit = new Literal(true, atom);
 		
