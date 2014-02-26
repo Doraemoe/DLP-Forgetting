@@ -34,6 +34,7 @@ public class Program {
 			}
 			
 		}
+		//System.out.println(red);
 		program.removeAll(red);
 		
 		return false;

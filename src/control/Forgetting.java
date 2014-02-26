@@ -31,7 +31,11 @@ public class Forgetting {
 	    
 		reader = new Read();
 	    prog = reader.readFile(location);
-	    
+	    /*
+	    for(Rule r : prog.getProgram()) {
+	    	System.out.println(r);
+	    }
+	    */
 	}
 	
 	public void spilitProgram(String atom) {

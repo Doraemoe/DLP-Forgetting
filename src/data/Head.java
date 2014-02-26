@@ -13,8 +13,15 @@ public class Head {
 		return head.remove(lit);
 	}
 	
+	public boolean isEmpty() {
+		return head.isEmpty();
+	}
+	
 	@Override
 	public String toString() {
+		if(head.isEmpty()) {
+			return "";
+		}
 		StringBuilder result = new StringBuilder();
 		for(Literal s : head) {
 			result.append(s).append(";");

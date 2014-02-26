@@ -13,6 +13,9 @@ public class Rule {
 	
 	@Override
 	public String toString() {
+		if(head.isEmpty()) {
+			return ":- " + body + ".";
+		}
 		if(!body.isEmpty()) {
 			return head + " :- " + body + ".";
 		}
@@ -57,7 +60,7 @@ public class Rule {
 		HashSet<Literal> b = body.getBody();
 		HashSet<Literal> h = head.getHead();
 		
-		if(b.isEmpty()) {
+		if(b.isEmpty() || h.isEmpty()) {
 			return false;
 		}
 		
@@ -72,8 +75,8 @@ public class Rule {
 	
 	public boolean isMinimalWRT(Rule r) {
 		
-		if(head.getHead().isEmpty()) {
-			if(r.body.getBody().containsAll(body.getBody())) {
+		if(head.isEmpty()) {
+			if(r.getBodySet().containsAll(body.getBody())) {
 				return true;
 			}
 			else {
@@ -81,8 +84,8 @@ public class Rule {
 			}
 		}
 		
-		if(body.getBody().isEmpty()) {
-			if(r.head.getHead().containsAll(head.getHead())) {
+		if(body.isEmpty()) {
+			if(r.getHeadSet().containsAll(head.getHead())) {
 				return true;
 			}
 			else {
@@ -90,7 +93,7 @@ public class Rule {
 			}
 		}
 		
-		if(r.body.getBody().containsAll(body.getBody()) && r.head.getHead().containsAll(head.getHead())) {
+		if(r.getBodySet().containsAll(body.getBody()) && r.getHeadSet().containsAll(head.getHead())) {
 			return true;
 		}
 		return false;
