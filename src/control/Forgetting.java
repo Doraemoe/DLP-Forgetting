@@ -173,6 +173,7 @@ public class Forgetting {
 				}
 				prog.addRule(newRule);
 			}
+			
 			for(Rule r : prog.getProgram()) {
 				System.out.println(r);
 			}
