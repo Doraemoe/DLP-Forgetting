@@ -56,6 +56,10 @@ public class Rule {
 		return body.isEmpty();
 	}
 	
+	public boolean isHeadEmpty() {
+		return head.isEmpty();
+	}
+	
 	public boolean haveCommonHeadAndBody() {
 		HashSet<Literal> b = body.getBody();
 		HashSet<Literal> h = head.getHead();
