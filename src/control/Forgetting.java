@@ -28,7 +28,7 @@ public class Forgetting {
 	}
 
 	public void readInput(String location) throws IOException {
-		System.out.println(location);
+		//System.out.println(location);
 
 		reader = new Read();
 		prog = reader.readFile(location);
@@ -50,8 +50,8 @@ public class Forgetting {
 				rel.add(rule);
 			}
 		}
-		System.out.println(ind);
-		System.out.println(rel);
+		//System.out.println(ind);
+		//System.out.println(rel);
 	}
 
 	public void findPairWGPPE(String atom) {
@@ -68,8 +68,8 @@ public class Forgetting {
 	}
 
 	public void addNewRuleWGPPE(String atom) {
-		System.out.println(WGPPEBody);
-		System.out.println(WGPPEHead);
+		//System.out.println(WGPPEBody);
+		//System.out.println(WGPPEHead);
 		Literal lit = new Literal(false, atom);
 		for(Rule r1 : WGPPEBody) {
 			for(Rule r2 : WGPPEHead) {
@@ -106,8 +106,8 @@ public class Forgetting {
 
 	public void addNewRuleSHYP(String atom) {
 
-		System.out.println(SHYPPBody);
-		System.out.println(SHYPNBody);
+		//System.out.println(SHYPPBody);
+		//System.out.println(SHYPNBody);
 
 		Literal pLit = new Literal(false, atom);
 		Literal nLit = new Literal(true, atom);
