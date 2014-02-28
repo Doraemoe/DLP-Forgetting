@@ -146,7 +146,7 @@ public class Forgetting {
 	}
 
 	public void generateProgram(int numOfMinAtom, int numOfMinRule, int numOfMaxHead,
-			int numOfMaxBody, int offsetAtom, int offsetRule, int numOfSet) {
+			int numOfMaxBody, int offsetAtom, int offsetRule, int numOfSet, String location) throws IOException {
 		
 		Random rnd = new Random();
 		
@@ -154,30 +154,35 @@ public class Forgetting {
 			int ruleNum = numOfMinRule + (set * offsetRule);
 			int atomNum = numOfMinAtom + (set * offsetAtom);
 			
-			for(int rule = 0; rule < ruleNum; rule++) {
-				Rule newRule = new Rule();
-				int numOfHead = rnd.nextInt(numOfMaxHead) + 1;
-				for(int h = 0; h < numOfHead; h++) {
-					Literal lit = new Literal(false, String.valueOf(rnd.nextInt(atomNum)));
-					newRule.addToHead(lit);
+			for(int i = 0; i < 100; i++) {
+				prog = new Program();
+				for(int rule = 0; rule < ruleNum; rule++) {
+					Rule newRule = new Rule();
+					int numOfHead = rnd.nextInt(numOfMaxHead) + 1;
+					for(int h = 0; h < numOfHead; h++) {
+						Literal lit = new Literal(false, String.valueOf(rnd.nextInt(atomNum)));
+						newRule.addToHead(lit);
+					}
+					int numOfBody = rnd.nextInt(numOfMaxBody + 1);
+					int numOfNBody = rnd.nextInt(numOfBody + 1);
+					for(int nb = 0; nb < numOfNBody; nb++) {
+						Literal lit = new Literal(true, String.valueOf(rnd.nextInt(atomNum)));
+						newRule.addToBody(lit);
+					}
+					for(int pb = 0; pb < numOfBody - numOfNBody; pb++) {
+						Literal lit = new Literal(false, String.valueOf(rnd.nextInt(atomNum)));
+						newRule.addToBody(lit);
+					}
+					prog.addRule(newRule);
 				}
-				int numOfBody = rnd.nextInt(numOfMaxBody + 1);
-				int numOfNBody = rnd.nextInt(numOfBody + 1);
-				for(int nb = 0; nb < numOfNBody; nb++) {
-					Literal lit = new Literal(true, String.valueOf(rnd.nextInt(atomNum)));
-					newRule.addToBody(lit);
+				
+				FileWriter fw = new FileWriter(location + "\\" + String.valueOf(atomNum) + "and" + String.valueOf(ruleNum) + "of" + i + ".txt");
+				for(Rule r : prog.getProgram()) {
+					fw.write(r.toString());
+					fw.write("\r\n");
 				}
-				for(int pb = 0; pb < numOfBody - numOfNBody; pb++) {
-					Literal lit = new Literal(false, String.valueOf(rnd.nextInt(atomNum)));
-					newRule.addToBody(lit);
-				}
-				prog.addRule(newRule);
+				fw.close();
 			}
-			
-			for(Rule r : prog.getProgram()) {
-				System.out.println(r);
-			}
-			System.out.println("===========");
 		}
 
 	}
@@ -188,7 +193,7 @@ public class Forgetting {
 			//System.out.println("this");
 			alg.generateProgram(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]),
 					Integer.parseInt(args[4]), Integer.parseInt(args[5]), Integer.parseInt(args[6]),
-					Integer.parseInt(args[7]));
+					Integer.parseInt(args[7]), args[8]);
 		}
 		else if(args[0].equals("1")) {
 			alg.readInput(args[1]);
