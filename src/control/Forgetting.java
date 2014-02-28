@@ -135,13 +135,15 @@ public class Forgetting {
 		}
 	}
 
-	public void exportToFile(String location) throws IOException {
+	public void exportToFile(String location, long startTime) throws IOException {
+		long endTime=System.currentTimeMillis();
 		FileWriter fw = new FileWriter(location);
 		for(Rule r : ind) {
 			//System.out.println(r);
 			fw.write(r.toString());
 			fw.write("\r\n");
 		}
+		fw.write("Running time: " + (endTime-startTime) + "ms");
 		fw.close();
 	}
 
@@ -196,13 +198,15 @@ public class Forgetting {
 					Integer.parseInt(args[7]), args[8]);
 		}
 		else if(args[0].equals("1")) {
+			
 			alg.readInput(args[1]);
+			long startTime=System.currentTimeMillis();
 			alg.spilitProgram(args[2]);
 			alg.findPairWGPPE(args[2]);
 			alg.addNewRuleWGPPE(args[2]);
 			alg.findPairSHYP(args[2]);
 			alg.addNewRuleSHYP(args[2]);
-			alg.exportToFile(args[3]);
+			alg.exportToFile(args[3], startTime);
 		}
 
 	}
