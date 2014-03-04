@@ -1,7 +1,12 @@
 package control;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -178,16 +183,120 @@ public class Forgetting {
 					prog.addRule(newRule);
 				}
 				
-				FileWriter fw = new FileWriter(location + "\\" + String.valueOf(atomNum) + "and" + String.valueOf(ruleNum) + "of" + i + ".txt");
+				File dir = new File(location);
+				if (!dir.exists() || !dir.isDirectory()) {
+					dir.mkdirs();
+				}
+				FileWriter fw = new FileWriter(location + File.separatorChar + String.valueOf(atomNum) + "and" + String.valueOf(ruleNum) + "of" + i + ".txt");
 				for(Rule r : prog.getProgram()) {
 					fw.write(r.toString());
-					fw.write("\r\n");
+					fw.write(System.lineSeparator());
 				}
 				fw.close();
 			}
 		}
-
 	}
+	
+	public String readLastLine(File file, String charset) throws IOException {  
+		  if (!file.exists() || file.isDirectory() || !file.canRead()) {  
+		    return null;  
+		  }  
+		  RandomAccessFile raf = null;  
+		  try {  
+		    raf = new RandomAccessFile(file, "r");  
+		    long len = raf.length();  
+		    if (len == 0L) {  
+		      return "";  
+		    } else {  
+		      long pos = len - 1;  
+		      while (pos > 0) {  
+		        pos--;  
+		        raf.seek(pos);  
+		        if (raf.readByte() == '\n') {  
+		          break;  
+		        }  
+		      }  
+		      if (pos == 0) {  
+		        raf.seek(0);  
+		      }  
+		      byte[] bytes = new byte[(int) (len - pos)];  
+		      raf.read(bytes);  
+		      if (charset == null) {  
+		        return new String(bytes);  
+		      } else {  
+		        return new String(bytes, charset);  
+		      }  
+		    }  
+		  } catch (FileNotFoundException e) {  
+		  } finally {  
+		    if (raf != null) {  
+		      try {  
+		        raf.close();  
+		      } catch (Exception e2) {  
+		      }  
+		    }  
+		  }  
+		  return null;  
+		}  
+	
+	
+	public int getTime(File file) throws IOException {
+		String lastLine = readLastLine(file, "utf8");
+		lastLine = lastLine.trim();
+		String time = lastLine.split(":")[1].trim();
+		time = time.substring(0, time.length() - 2);
+		return Integer.parseInt(time);
+	}
+	
+	
+	public void calculateTime(String location) throws IOException {
+		String now = new String("empty");
+		boolean isFirst = true;
+		int totalTime = 0;
+		
+		File file = new File(location);
+		String[] filelist = file.list(getFileExtensionFilter(".txt"));
+		Arrays.sort(filelist);
+		
+		FileWriter fw = null;
+		
+		for(String s : filelist) {
+			File currentFile = new File(location + File.separatorChar + s);
+			String atom = s.split("and")[0];
+			String rule = s.split("and")[1].split("of")[0];
+			
+			if(!now.equals(atom)) {
+				if(isFirst) {
+					totalTime = getTime(currentFile);
+					isFirst = false;
+					fw = new FileWriter(location + File.separatorChar + "Result" + atom + "and" + rule + ".txt");
+					now = atom;
+				}
+				else {
+					fw.write("Total Time: " + totalTime);
+					fw.write(System.lineSeparator());
+					fw.write("Average Time: " + totalTime/100);
+					fw.close();
+					fw = new FileWriter(location + File.separatorChar + "Result" + atom + "and" + rule + ".txt");
+					now = atom;
+					totalTime = getTime(currentFile);
+				}
+			}
+			else {
+				totalTime += getTime(currentFile);
+			}
+		}
+	}
+	
+	 public static FilenameFilter getFileExtensionFilter(String extension) {
+		  final String _extension = extension;
+		  return new FilenameFilter() {
+		   public boolean accept(File file, String name) {
+		    boolean ret = name.endsWith(_extension);
+		    return ret;
+		   }
+		  };
+		 }
 
 	public static void main(String[] args) throws IOException {
 		Forgetting alg = new Forgetting();
@@ -208,7 +317,9 @@ public class Forgetting {
 			alg.addNewRuleSHYP(args[2]);
 			alg.exportToFile(args[3], startTime);
 		}
-
+		else if(args[0].equals("2")) {
+			alg.calculateTime(args[1]);
+		}
 	}
 
 }
