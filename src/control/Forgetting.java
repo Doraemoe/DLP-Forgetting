@@ -286,6 +286,10 @@ public class Forgetting {
 				totalTime += getTime(currentFile);
 			}
 		}
+		fw.write("Total Time: " + totalTime);
+		fw.write(System.lineSeparator());
+		fw.write("Average Time: " + totalTime/100);
+		fw.close();
 	}
 	
 	 public static FilenameFilter getFileExtensionFilter(String extension) {
