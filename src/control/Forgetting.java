@@ -384,6 +384,7 @@ public class Forgetting {
 			sets = ruleSet.toArray(sets);
 			Set<Set<Object>> combRule = cartesianProduct(sets);
 			
+			
 			for(Set<Object> setRule : combRule) {	
 				Rule newRule = new Rule();
 				//System.out.println(setRule);
@@ -406,10 +407,7 @@ public class Forgetting {
 	}
 	
 	public static Set<Set<Object>> cartesianProduct(Set<?>... sets) {
-	    if (sets.length < 2)
-	        throw new IllegalArgumentException(
-	                "Can't have a product of fewer than two sets (got " +
-	                sets.length + ")");
+
 
 	    return _cartesianProduct(0, sets);
 	}
