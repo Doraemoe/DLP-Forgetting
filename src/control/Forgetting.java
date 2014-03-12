@@ -7,8 +7,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import data.Literal;
 import data.Program;
@@ -26,6 +28,9 @@ public class Forgetting {
 
 	HashSet<Rule> SHYPPBody = new HashSet<Rule>();
 	HashSet<Rule> SHYPNBody = new HashSet<Rule>();
+
+	HashMap<Literal, HashSet<Rule>> SHYPMap = new HashMap<Literal, HashSet<Rule>>();
+	HashSet<Rule> SHYPNRule = new HashSet<Rule>();
 
 	Forgetting() {
 		reader = new Read();
@@ -146,7 +151,7 @@ public class Forgetting {
 		for(Rule r : ind) {
 			//System.out.println(r);
 			fw.write(r.toString());
-			fw.write("\r\n");
+			fw.write(System.lineSeparator());
 		}
 		fw.write("Running time: " + (endTime-startTime) + "ms");
 		fw.close();
@@ -154,13 +159,13 @@ public class Forgetting {
 
 	public void generateProgram(int numOfMinAtom, int numOfMinRule, int numOfMaxHead,
 			int numOfMaxBody, int offsetAtom, int offsetRule, int numOfSet, String location) throws IOException {
-		
+
 		Random rnd = new Random();
-		
+
 		for(int set = 0; set < numOfSet; set++) {
 			int ruleNum = numOfMinRule + (set * offsetRule);
 			int atomNum = numOfMinAtom + (set * offsetAtom);
-			
+
 			for(int i = 0; i < 100; i++) {
 				prog = new Program();
 				for(int rule = 0; rule < ruleNum; rule++) {
@@ -182,7 +187,7 @@ public class Forgetting {
 					}
 					prog.addRule(newRule);
 				}
-				
+
 				File dir = new File(location);
 				if (!dir.exists() || !dir.isDirectory()) {
 					dir.mkdirs();
@@ -196,75 +201,75 @@ public class Forgetting {
 			}
 		}
 	}
-	
-	public String readLastLine(File file, String charset) throws IOException {  
-		  if (!file.exists() || file.isDirectory() || !file.canRead()) {  
-		    return null;  
-		  }  
-		  RandomAccessFile raf = null;  
-		  try {  
-		    raf = new RandomAccessFile(file, "r");  
-		    long len = raf.length();  
-		    if (len == 0L) {  
-		      return "";  
-		    } else {  
-		      long pos = len - 1;  
-		      while (pos > 0) {  
-		        pos--;  
-		        raf.seek(pos);  
-		        if (raf.readByte() == '\n') {  
-		          break;  
-		        }  
-		      }  
-		      if (pos == 0) {  
-		        raf.seek(0);  
-		      }  
-		      byte[] bytes = new byte[(int) (len - pos)];  
-		      raf.read(bytes);  
-		      if (charset == null) {  
-		        return new String(bytes);  
-		      } else {  
-		        return new String(bytes, charset);  
-		      }  
-		    }  
-		  } catch (FileNotFoundException e) {  
-		  } finally {  
-		    if (raf != null) {  
-		      try {  
-		        raf.close();  
-		      } catch (Exception e2) {  
-		      }  
-		    }  
-		  }  
-		  return null;  
+
+	private String readLastLine(File file, String charset) throws IOException {  
+		if (!file.exists() || file.isDirectory() || !file.canRead()) {  
+			return null;  
 		}  
-	
-	
-	public int getTime(File file) throws IOException {
+		RandomAccessFile raf = null;  
+		try {  
+			raf = new RandomAccessFile(file, "r");  
+			long len = raf.length();  
+			if (len == 0L) {  
+				return "";  
+			} else {  
+				long pos = len - 1;  
+				while (pos > 0) {  
+					pos--;  
+					raf.seek(pos);  
+					if (raf.readByte() == '\n') {  
+						break;  
+					}  
+				}  
+				if (pos == 0) {  
+					raf.seek(0);  
+				}  
+				byte[] bytes = new byte[(int) (len - pos)];  
+				raf.read(bytes);  
+				if (charset == null) {  
+					return new String(bytes);  
+				} else {  
+					return new String(bytes, charset);  
+				}  
+			}  
+		} catch (FileNotFoundException e) {  
+		} finally {  
+			if (raf != null) {  
+				try {  
+					raf.close();  
+				} catch (Exception e2) {  
+				}  
+			}  
+		}  
+		return null;  
+	}  
+
+
+	private int getTime(File file) throws IOException {
 		String lastLine = readLastLine(file, "utf8");
 		lastLine = lastLine.trim();
 		String time = lastLine.split(":")[1].trim();
 		time = time.substring(0, time.length() - 2);
 		return Integer.parseInt(time);
 	}
-	
-	
+
+
 	public void calculateTime(String location) throws IOException {
 		String now = new String("empty");
 		boolean isFirst = true;
 		int totalTime = 0;
-		
+
 		File file = new File(location);
 		String[] filelist = file.list(getFileExtensionFilter(".txt"));
 		Arrays.sort(filelist);
-		
+
 		FileWriter fw = null;
-		
+
 		for(String s : filelist) {
 			File currentFile = new File(location + File.separatorChar + s);
 			String atom = s.split("and")[0];
 			String rule = s.split("and")[1].split("of")[0];
-			
+
 			if(!now.equals(atom)) {
 				if(isFirst) {
 					totalTime = getTime(currentFile);
@@ -291,16 +296,138 @@ public class Forgetting {
 		fw.write("Average Time: " + totalTime/100);
 		fw.close();
 	}
+
+	private static FilenameFilter getFileExtensionFilter(String extension) {
+		final String _extension = extension;
+		return new FilenameFilter() {
+			public boolean accept(File file, String name) {
+				boolean ret = name.endsWith(_extension);
+				return ret;
+			}
+		};
+	}
+
 	
-	 public static FilenameFilter getFileExtensionFilter(String extension) {
-		  final String _extension = extension;
-		  return new FilenameFilter() {
-		   public boolean accept(File file, String name) {
-		    boolean ret = name.endsWith(_extension);
-		    return ret;
-		   }
-		  };
-		 }
+	private void addToMap(Literal lit, Rule rule) {
+		Rule newRule = new Rule();
+		
+		if(SHYPMap.containsKey(lit)) {
+			newRule.addAllToHead(rule.getHeadSet());
+			HashSet<Literal> newBody = new HashSet<Literal>(rule.getBodySet());
+			newBody.remove(lit);
+			newRule.addAllToBody(newBody);
+			SHYPMap.get(lit).add(newRule);
+		}
+		else {
+			HashSet<Rule> setRule = new HashSet<Rule>();
+			newRule.addAllToHead(rule.getHeadSet());
+			HashSet<Literal> newBody = new HashSet<Literal>(rule.getBodySet());
+			newBody.remove(lit);
+			newRule.addAllToBody(newBody);
+			setRule.add(newRule);
+			SHYPMap.put(lit, setRule);
+		}
+	}
+	
+	public void findRelatedRuleSHYP(String atom) {
+		HashSet<Literal> processed = new HashSet<Literal>();
+		Literal pLit = new Literal(false, atom);
+		
+		for(Rule r : rel) {
+			if(r.isInPBody(pLit)) {
+				SHYPNRule.add(r);
+				HashSet<Literal> pSet = r.getBody().getPBody();
+				//System.out.println("here?");
+				for(Literal l : pSet) {
+					Literal nLit = new Literal(true, l.getAtom());
+					if(processed.contains(nLit)) {
+						continue;
+					}
+					else {
+						processed.add(nLit);
+					}
+					for(Rule ru : prog.getProgram()) {
+						if(ru.getBodySet().contains(nLit)) {
+							addToMap(nLit, ru);
+						}
+					}
+				}
+			}
+		}
+		//System.out.println(SHYPMap);
+	}
+	
+	public void addNewRuleSHYPComplate() {
+		HashSet<HashSet<Rule>> ruleSet = new HashSet<HashSet<Rule>>();
+		boolean zeroFlag = false;
+		
+		
+		for(Rule r : SHYPNRule) {
+			HashSet<Literal> pSet = r.getBody().getPBody();
+			for(Literal l : pSet) {
+				Literal lit = new Literal(true, l.getAtom());
+				if(!SHYPMap.containsKey(lit)) {
+					zeroFlag = true;
+				}
+			}
+			if(zeroFlag) {
+				zeroFlag = false;
+				continue;
+			}
+			for(Literal l : pSet) {
+				Literal lit = new Literal(true, l.getAtom());
+				ruleSet.add(SHYPMap.get(lit));
+			}
+			//System.out.println(ruleSet);
+			@SuppressWarnings("unchecked")
+			HashSet<Rule>[] sets = new HashSet[ruleSet.size()];
+			sets = ruleSet.toArray(sets);
+			Set<Set<Object>> combRule = cartesianProduct(sets);
+			
+			for(Set<Object> setRule : combRule) {	
+				Rule newRule = new Rule();
+				//System.out.println(setRule);
+				for(Object rule : setRule) {
+					Rule castRule = (Rule)rule;
+					newRule.addAllToHead(castRule.getHeadSet());
+					newRule.addAllToBody(castRule.getBodySet());
+				}
+				newRule.addAllToBody(r.getBody().getNBody());
+				for(Literal lit : r.getHeadSet()) {
+					Literal newLit = new Literal(true, lit.getAtom());
+					newRule.addToBody(newLit);
+				}
+				//System.out.println(newRule);
+				if(!newRule.isBodyEmpty() && !newRule.isHeadEmpty()) {
+					ind.add(newRule);
+				}
+			}
+		}
+	}
+	
+	public static Set<Set<Object>> cartesianProduct(Set<?>... sets) {
+	    if (sets.length < 2)
+	        throw new IllegalArgumentException(
+	                "Can't have a product of fewer than two sets (got " +
+	                sets.length + ")");
+
+	    return _cartesianProduct(0, sets);
+	}
+
+	private static Set<Set<Object>> _cartesianProduct(int index, Set<?>... sets) {
+	    Set<Set<Object>> ret = new HashSet<Set<Object>>();
+	    if (index == sets.length) {
+	        ret.add(new HashSet<Object>());
+	    } else {
+	        for (Object obj : sets[index]) {
+	            for (Set<Object> set : _cartesianProduct(index+1, sets)) {
+	                set.add(obj);
+	                ret.add(set);
+	            }
+	        }
+	    }
+	    return ret;
+	}
 
 	public static void main(String[] args) throws IOException {
 		Forgetting alg = new Forgetting();
@@ -311,14 +438,19 @@ public class Forgetting {
 					Integer.parseInt(args[7]), args[8]);
 		}
 		else if(args[0].equals("1")) {
-			
+
 			alg.readInput(args[1]);
 			long startTime=System.currentTimeMillis();
 			alg.spilitProgram(args[2]);
 			alg.findPairWGPPE(args[2]);
 			alg.addNewRuleWGPPE(args[2]);
-			alg.findPairSHYP(args[2]);
-			alg.addNewRuleSHYP(args[2]);
+
+			//alg.findPairSHYP(args[2]);
+			//alg.addNewRuleSHYP(args[2]);
+
+			alg.findRelatedRuleSHYP(args[2]);
+			alg.addNewRuleSHYPComplate();
+			
 			alg.exportToFile(args[3], startTime);
 		}
 		else if(args[0].equals("2")) {

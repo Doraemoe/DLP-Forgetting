@@ -64,8 +64,17 @@ public class Rule {
 		HashSet<Literal> b = body.getBody();
 		HashSet<Literal> h = head.getHead();
 		
+		HashSet<String> conTest = new HashSet<String>();
+		
 		if(b.isEmpty() || h.isEmpty()) {
 			return false;
+		}
+		
+		for (Literal l : b) {
+			String atom = l.getAtom();
+			if(!conTest.add(atom)) {
+				return true;
+			}
 		}
 		
 		for (Literal l : b) {
