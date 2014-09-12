@@ -258,6 +258,7 @@ public class Forgetting {
 		String now = new String("empty");
 		boolean isFirst = true;
 		int totalTime = 0;
+		int totalFile = 1;
 
 		File file = new File(location);
 		String[] filelist = file.list(getFileExtensionFilter(".txt"));
@@ -276,24 +277,31 @@ public class Forgetting {
 					isFirst = false;
 					fw = new FileWriter(location + File.separatorChar + "Result" + atom + "and" + rule + ".txt");
 					now = atom;
+					totalFile = 1;
 				}
 				else {
 					fw.write("Total Time: " + totalTime);
 					fw.write(System.lineSeparator());
-					fw.write("Average Time: " + totalTime/100);
+					fw.write("Total Files: " + totalFile);
+					fw.write(System.lineSeparator());
+					fw.write("Average Time: " + totalTime/totalFile);
 					fw.close();
 					fw = new FileWriter(location + File.separatorChar + "Result" + atom + "and" + rule + ".txt");
 					now = atom;
 					totalTime = getTime(currentFile);
+					totalFile = 1;
 				}
 			}
 			else {
+				++totalFile;
 				totalTime += getTime(currentFile);
 			}
 		}
 		fw.write("Total Time: " + totalTime);
 		fw.write(System.lineSeparator());
-		fw.write("Average Time: " + totalTime/100);
+		fw.write("Total Files: " + totalFile);
+		fw.write(System.lineSeparator());
+		fw.write("Average Time: " + totalTime/totalFile);
 		fw.close();
 	}
 
