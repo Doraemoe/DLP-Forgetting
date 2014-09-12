@@ -11,6 +11,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import data.Literal;
 import data.Program;
@@ -166,7 +172,7 @@ public class Forgetting {
 			int ruleNum = numOfMinRule + (set * offsetRule);
 			int atomNum = numOfMinAtom + (set * offsetAtom);
 
-			for(int i = 0; i < 100; i++) {
+			for(int i = 0; i < 20; i++) {
 				prog = new Program();
 				for(int rule = 0; rule < ruleNum; rule++) {
 					Rule newRule = new Rule();
@@ -435,31 +441,104 @@ public class Forgetting {
 	    return ret;
 	}
 
-	public static void main(String[] args) throws IOException {
-		Forgetting alg = new Forgetting();
+/*	private void CalForgetting(String filename, String atom, String output) throws IOException {
+		readInput(filename);
+		long startTime=System.currentTimeMillis();
+		spilitProgram(atom);
+		findPairWGPPE(atom);
+		addNewRuleWGPPE(atom);
+		
+		findRelatedRuleSHYP(atom);
+		addNewRuleSHYPComplate();
+		
+		exportToFile(output, startTime);
+	}
+*/	
+	public static class CalForgetting implements Callable<Void> {
+
+		String input;
+		String output;
+		String atom;
+		
+		public CalForgetting(String input, String atom, String output) {
+			this.input = new String(input);
+			this.output = new String(output);
+			this.atom = new String(atom);
+		}
+		
+		@Override
+		public Void call() throws Exception {
+			Forgetting alg = new Forgetting();
+			alg.readInput(input);
+			long startTime=System.currentTimeMillis();
+			
+			alg.spilitProgram(atom);
+			alg.findPairWGPPE(atom);
+			alg.addNewRuleWGPPE(atom);
+
+			alg.findRelatedRuleSHYP(atom);
+			alg.addNewRuleSHYPComplate();
+			
+			alg.exportToFile(output, startTime);
+			return null;
+		}
+		
+	}
+	
+	public static void main(String[] args) throws IOException, InterruptedException {
+		
 		if(args[0].equals("0")) {
+			Forgetting alg = new Forgetting();
 			//System.out.println("this");
 			alg.generateProgram(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]),
 					Integer.parseInt(args[4]), Integer.parseInt(args[5]), Integer.parseInt(args[6]),
 					Integer.parseInt(args[7]), args[8]);
 		}
 		else if(args[0].equals("1")) {
+			
+			File file = new File(args[1]);
+			String[] filelist = file.list(getFileExtensionFilter(".txt"));
+			Arrays.sort(filelist);
+			
+			for(String s : filelist) {
+				String input = new String(args[1] + File.separatorChar + s);
+				String output = new String(args[3] + File.separatorChar + s);
 
-			alg.readInput(args[1]);
-			long startTime=System.currentTimeMillis();
-			alg.spilitProgram(args[2]);
-			alg.findPairWGPPE(args[2]);
-			alg.addNewRuleWGPPE(args[2]);
+				
+				Future<Void> control = Executors.newSingleThreadExecutor().submit(new CalForgetting(input, args[2], output));
+				
+				try {
+					control.get(5, TimeUnit.MINUTES);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch ( ExecutionException e ) {
+					
+				} catch (TimeoutException e) {
+					System.out.println("timeout");
+					control.cancel(true);
+				}
+				
+				//alg.CalForgetting(input, args[2], output);
+				Thread.sleep(10000);
+			}
+
+			//alg.readInput(args[1]);
+			//long startTime=System.currentTimeMillis();
+			
+			//alg.spilitProgram(args[2]);
+			//alg.findPairWGPPE(args[2]);
+			//alg.addNewRuleWGPPE(args[2]);
 
 			//alg.findPairSHYP(args[2]);
 			//alg.addNewRuleSHYP(args[2]);
 
-			alg.findRelatedRuleSHYP(args[2]);
-			alg.addNewRuleSHYPComplate();
+			//alg.findRelatedRuleSHYP(args[2]);
+			//alg.addNewRuleSHYPComplate();
 			
-			alg.exportToFile(args[3], startTime);
+			//alg.exportToFile(args[3], startTime);
 		}
 		else if(args[0].equals("2")) {
+			Forgetting alg = new Forgetting();
 			alg.calculateTime(args[1]);
 		}
 	}
